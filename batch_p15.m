@@ -136,7 +136,7 @@ function openFile(hObject, eventdata)
                  
                  sliceNumber = str2double(get(handles.editSlice, 'string'));
                  
-                 masks = flipdim(openMask([maskPath maskFileName]), 3);    
+                 masks = flipdim(openMask([maskPath maskFileName], handles), 3);    
                  handles.dicom.mask = masks;
                  handles.dicom.dirPath = dirPath;
                  handles.dicom.metadata = metadata;
@@ -213,12 +213,15 @@ end
 close(h)
 end
 
-function masks = openMask(fileName)
+function masks = openMask(fileName, handles)
 
     if strfind(fileName,'hdr')
         masks = analyze75read(fileName);
     else
         masks = nrrd_read(fileName);
+        masks(masks > 500) = 0;
+        set(handles.txtRemovedAirWays, 'String',...
+            sprintf('Airway Removed: %s', 'Yes'))
     end
     
 end
@@ -927,7 +930,7 @@ function openAirWay(hObject, eventdata)
    
    if fileName
        try
-           airWayMask = flipdim(openMask([pathName fileName]), 3);
+           airWayMask = flipdim(openMask([pathName fileName], handles), 3);
            handles.dicom.mask(airWayMask ~= 0) = 0;
            set(handles.txtRemovedAirWays, 'String', sprintf('Airway Removed: %s', 'Yes'))
            guidata(hObject, handles)
