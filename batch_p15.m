@@ -218,12 +218,21 @@ function masks = openMask(fileName, handles)
     if strfind(fileName,'hdr')
         masks = analyze75read(fileName);
     else
-        masks = nrrd_read(fileName);
+        masks = removeAirWaysFromMask(fileName);
+    end
+    
+end
+
+function masks = removeAirWaysFromMask(fileName)
+    masks = nrrd_read(fileName);
+    answer = questdlg('Remover via aerea automaticamente?','Via Aerea','Sim',...
+        'Não','Não');
+    
+    if strcmp(answer, 'Sim')
         masks(masks > 500) = 0;
         set(handles.txtRemovedAirWays, 'String',...
             sprintf('Airway Removed: %s', 'Yes'))
-    end
-    
+    end    
 end
 
 function metadata = getDicomInformation(fileName)
@@ -317,17 +326,17 @@ end
 function showMask(lung, mask)
 
      mask = mask >= 1;
-     poly = mask2poly(mask, 'Inner');
+%    poly = mask2poly(mask, 'Inner');
 % 
-%     color1 = 0; color2 = 0.8; color3 = 0;
-%     colorMask = cat(3, color1 * ones(size(lung)), color2 * ones(size(lung)),...
-%         color3 * ones(size(lung)));
+    color1 = 0; color2 = 0.8; color3 = 0;
+    colorMask = cat(3, color1 * ones(size(lung)), color2 * ones(size(lung)),...
+         color3 * ones(size(lung)));
 %     
-%     hold on
-%     h = imshow(colorMask);
-%     set(h, 'AlphaData', mask);
-    hold on 
-    plot(poly(:, 1), poly(:, 2), 'g')
+     hold on
+     h = imshow(colorMask);
+     set(h, 'AlphaData', mask);
+%    hold on 
+   % plot(poly(:, 1), poly(:, 2), 'g')
     
 end
 
@@ -449,12 +458,13 @@ end
 
 function showMaskOverLung(lung, mask)
 fig = figure;
-intensity = 300;
+intensity = 600;
 maskM3 = mask * intensity;
 c1M3=0.5; c2M3=0.8; c3M3=0.2;
-maskColorM3 = cat(3, c1M3 * ones(size(lung)), c2M3 * ones(size(lung)), c3M3 * ones(size(lung)));
-imshow(lung)
-%colormap(gray)
+maskColorM3 = cat(3, c1M3 * ones(size(lung)), c2M3 * ones(size(lung)),...
+    c3M3 * ones(size(lung)));
+imagesc(lung)
+colormap(gray)
 hold on
 h = imshow(maskColorM3);
 hold off
