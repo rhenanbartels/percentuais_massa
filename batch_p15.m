@@ -139,6 +139,8 @@ function openFile(hObject, eventdata)
                  masks = flipdim(openMask([maskPath maskFileName], handles), 3);    
                  handles.dicom.mask = masks;
                  handles.dicom.dirPath = dirPath;
+                 [metadata, metadata2] = replaceMissingFields(metadata,...
+                     metadata2);
                  handles.dicom.metadata = metadata;
                  handles.dicom.metadata2 = metadata2;
                  guidata(hObject, handles);                 
@@ -155,6 +157,21 @@ function openFile(hObject, eventdata)
              warndlg('No DICOMS file was found!', 'No DICOM')
          end
 
+     end
+end
+
+
+function [metadata1, metadata2] = replaceMissingFields(metadata1, metadata2)
+     if ~isfield(metadata1, RescaleSlope)
+         slope = inputdlg('Enter new slope: ');
+         metadata1.RescaleSlope = str2double(slope);
+         metadata2.RescaleSlope = str2double(slope);
+     end
+     
+     if ~isfield(metadata1, RescaleIntercept)
+         intercept = inputdlg('Enter new intercept: ');
+         metadata1.RescaleIntercept = str2double(intercept);
+         metadata2.RescaleIntercept = str2double(intercept);
      end
 end
 
@@ -449,7 +466,9 @@ else
         thick=abs(metadata.PixelDimensions(3));
     end
     
-    SpacingBetweenSlices = abs(metadata2.SliceLocation - metadata.SliceLocation);
+    if isfield(metadata, 'SliceLocation')
+        SpacingBetweenSlices = abs(metadata2.SliceLocation - metadata.SliceLocation);
+    end
 
     SliceThickness = metadata.SliceThickness;
     voxelVolume = (metadata.PixelSpacing(1) ^ 2 * thick * 0.001) * (SpacingBetweenSlices / SliceThickness);
