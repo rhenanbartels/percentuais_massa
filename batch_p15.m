@@ -162,13 +162,13 @@ end
 
 
 function [metadata1, metadata2] = replaceMissingFields(metadata1, metadata2)
-     if ~isfield(metadata1, RescaleSlope)
+     if ~isfield(metadata1, 'RescaleSlope')
          slope = inputdlg('Enter new slope: ');
          metadata1.RescaleSlope = str2double(slope);
          metadata2.RescaleSlope = str2double(slope);
      end
      
-     if ~isfield(metadata1, RescaleIntercept)
+     if ~isfield(metadata1, 'RescaleIntercept')
          intercept = inputdlg('Enter new intercept: ');
          metadata1.RescaleIntercept = str2double(intercept);
          metadata2.RescaleIntercept = str2double(intercept);
@@ -233,14 +233,14 @@ end
 function masks = openMask(fileName, handles)
 
     if strfind(fileName,'hdr')
-        masks = analyze75read(fileName);
+        masks = analyze75read(fileName, handles);
     else
-        masks = removeAirWaysFromMask(fileName);
+        masks = removeAirWaysFromMask(fileName, handles);
     end
     
 end
 
-function masks = removeAirWaysFromMask(fileName)
+function masks = removeAirWaysFromMask(fileName, handles)
     masks = nrrd_read(fileName);
     answer = questdlg('Remover via aerea automaticamente?','Via Aerea','Sim',...
         'Não','Não');
